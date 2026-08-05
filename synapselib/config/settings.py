@@ -26,7 +26,7 @@ class Settings(BaseSettings):
     # ---- 大模型 ----
     deepseek_api_key: str = ""
     deepseek_base_url: str = "https://api.deepseek.com"
-    deepseek_model: str = "deepseek-chat"
+    deepseek_model: str = "deepseek-v4-flash"
 
     ollama_base_url: str = "http://localhost:11434"
     ollama_model: str = "qwen2.5:7b"

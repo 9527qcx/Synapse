@@ -20,7 +20,7 @@ class TestDefaults:
     def test_model_defaults(self):
         s = Settings()
         assert s.deepseek_base_url == "https://api.deepseek.com"
-        assert s.deepseek_model == "deepseek-chat"
+        assert s.deepseek_model == "deepseek-v4-flash"  # 与 config/settings.py 默认值同步
         assert s.mock_mode is False
         assert s.embedder == "local"
         assert s.dedup_cosine_threshold == 0.90
