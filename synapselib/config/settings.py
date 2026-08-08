@@ -41,13 +41,18 @@ class Settings(BaseSettings):
     embedder_model: str = "BAAI/bge-m3"
 
     # ---- 向量记忆（ChromaDB）----
+    chroma_collection_name: str = "snippets"
     chroma_dir: str = "data/chroma"
     dedup_cosine_threshold: float = 0.90  # §6.2 去重粗筛阈值
     dedup_claim_overlap: float = 0.80  # §6.2 去重细判阈值（claims 重合率）
+    credibility_score_threshold: float = 7.0  # §6.2 信度阈值（0-10）
 
     # ---- 短期记忆 ----
     stm_budget_tokens: int = 8000  # 超过该 token 数触发摘要压缩
     stm_keep_last_turns: int = 6  # 保留最近 N 轮完整对话
+
+    # ---- 用户偏好（§6.5 MVP：显式反馈，JSON 存储）----
+    preferences_file: str = "data/user_preferences.json"
 
     # ---- 可观测（LangFuse）----
     langfuse_public_key: str = ""
@@ -85,9 +90,13 @@ class Settings(BaseSettings):
         p = Path(self.chroma_dir)
         return p if p.is_absolute() else ROOT_DIR / p
 
+    def preferences_path(self) -> Path:
+        """用户偏好 JSON 路径（同 chroma_path 的相对路径解析规则）。"""
+        p = Path(self.preferences_file)
+        return p if p.is_absolute() else ROOT_DIR / p
+
 
 _settings: Settings | None = None
-
 
 def get_settings() -> Settings:
     """单例获取配置（避免重复读 .env / 环境变量）。"""
