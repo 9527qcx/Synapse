@@ -61,17 +61,22 @@ class Verdict(str, Enum):
 # ---------------------------------------------------------------- §17.1 Task
 
 class Task(BaseModel):
-    """研究任务（§17.1）。"""
+    """研究任务（§17.1）。
 
-    task_id: str = Field(default_factory=lambda: uuid4().hex)
-    description: str
-    search_queries: list[str] = Field(default_factory=list)
-    priority: int = Field(default=5, ge=1, le=10)
-    dependencies: list[str] = Field(default_factory=list)
-    status: TaskStatus = TaskStatus.PENDING
-    assigned_to: str = "researcher"
-    reflection_count: int = Field(default=0, ge=0)
-    source: TaskSource = TaskSource.INITIAL
+    - task_id: 任务身份证（uuid4 hex），全局唯一，也是 dependencies 依赖引用的钥匙
+    - dependencies: 前置任务 id【字符串】列表——这些任务 COMPLETED 前，本任务不得执行
+    - reflection_count: 已反思轮数（critic 判 NEEDS_REVISION 时 +1），上限 2，超了降级放行
+    """
+
+    task_id: str = Field(default_factory=lambda: uuid4().hex)  # 任务唯一标识（uuid4 hex）
+    description: str  # 研究什么问题（核心字段，researcher 用它搜索/提炼）
+    search_queries: list[str] = Field(default_factory=list)  # 搜索词列表，researcher 最多取前 2 个
+    priority: int = Field(default=5, ge=1, le=10)  # 优先级 1-10，队列排序用，大者先出队
+    dependencies: list[str] = Field(default_factory=list)  # ⚠️ 前置任务 id【字符串】列表（不是 Task 对象）
+    status: TaskStatus = TaskStatus.PENDING  # 生命周期：PENDING(排队) → RUNNING(执行中) → COMPLETED(完成)
+    assigned_to: str = "researcher"  # 负责角色（MVP 恒为 researcher）
+    reflection_count: int = Field(default=0, ge=0)  # 已反思轮数，上限 2（§7.4 收敛规则）
+    source: TaskSource = TaskSource.INITIAL  # 任务来源：INITIAL(初始) / CRITIC_REVISION(修订) / REPLAN(重规划)
 
     @field_validator("description")
     @classmethod
@@ -207,8 +212,17 @@ class ResearchResult(BaseModel):
     duplicates_skipped: int = 0
     usage: dict | None = None  # TODO(M4): 换成 models.schemas.Usage
     errors: list[str] = Field(default_factory=list)
+    snippets_rejected: int = 0
 
-
+class RunResult(BaseModel):
+    """多任务编排的最终汇总。"""
+    topic: str
+    tasks: list[Task]                      # 终态（含 reflection_count）
+    approved_snippets: list[ResearchSnippet]
+    reused_hits: list[ReusedHit]           # 记忆复用命中（复用率统计源）
+    contradictions: list[str]              # 未解决矛盾描述（§7.4 存疑标注）
+    reflection_rounds: int                 # 实际反思轮次
+    errors: list[str]
 # ---------------------------------------------------------------- 工具函数
 
 def _now_iso() -> str:

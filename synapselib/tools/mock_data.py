@@ -14,7 +14,7 @@ from synapselib.tools.schemas import ExtractionResult, PaperMeta, SearchResult
 MOCK_SEARCH_RESULTS: list[SearchResult] = [
     SearchResult(
         title="大模型幻觉问题与缓解技术综述（Mock 示例）",
-        url="https://example.com/llm-hallucination-survey",
+        url="https://arxiv.org/abs/2312.10997",
         snippet="综述了幻觉的定义、成因（数据偏差、训练目标缺陷）与主流缓解手段："
         "检索增强、事实核查、自我一致性等。",
         published_at="2025-01-15",

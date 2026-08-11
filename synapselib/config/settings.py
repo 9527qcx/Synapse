@@ -35,6 +35,7 @@ class Settings(BaseSettings):
     route_plan: str = "deepseek,ollama,mock"  # 规划类任务（§5.1 建议本地模型，可切）
     route_extract: str = "deepseek,ollama,mock"  # 检索提取类
     route_summarizer: str = "deepseek,mock"  # 短期记忆摘要
+    route_critic: str = "deepseek,mock"           # 审核必须强模
 
     # ---- 嵌入模型 ----
     embedder: str = "local"  # local = BGE-M3；mock = 测试嵌入（无需下载）
@@ -65,6 +66,8 @@ class Settings(BaseSettings):
     # ---- 调试 ----
     mock_mode: bool = False  # True = 全链路 mock，离线可跑通
 
+    reuse_similarity_threshold: float = 0.75         # §6.4 记忆复用阈值
+
     # ---------- 派生属性 ----------
 
     @property
@@ -74,6 +77,7 @@ class Settings(BaseSettings):
             "plan": self._parse_chain(self.route_plan),
             "extract": self._parse_chain(self.route_extract),
             "summarizer": self._parse_chain(self.route_summarizer),
+            "critic": self._parse_chain(self.route_critic)
         }
 
     @staticmethod
